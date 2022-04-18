@@ -1,26 +1,35 @@
 package karen
 
 import (
+	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
 )
+
+type testInterface interface {
+	Test()
+}
 
 type testStruct struct {
 	someField string `sometag:"thevalue"`
 }
 
+func (t testStruct) Test() {}
+
 func TestFindFieldWithMatchingTag(t *testing.T) {
+	assert := assert.New(t)
+
 	test := testStruct{
 		someField: "data",
 	}
 	field := FindFieldWithMatchingTag(reflect.ValueOf(test), "sometag", "thevalue")
 
-	if field.String() != "data" {
-		t.Fatal("did not get expected data from found field")
-	}
+	assert.Equal("data", field.String(), "field value is not data")
 }
 
 func TestIsEitherKind(t *testing.T) {
+	assert := assert.New(t)
+
 	testPtr := &testStruct{
 		someField: "data",
 	}
@@ -29,11 +38,22 @@ func TestIsEitherKind(t *testing.T) {
 		someField: "data",
 	}
 
-	if IsEitherKind(reflect.ValueOf(test), reflect.Pointer, reflect.Interface) {
-		t.Fatal("detected ", test, " as either pointer or interface")
-	}
+	assert.False(IsEitherKind(reflect.ValueOf(test), reflect.Pointer, reflect.Interface), "non pointer value is thought to be pointer")
+	assert.True(IsEitherKind(reflect.ValueOf(testPtr), reflect.Pointer, reflect.Interface), "pointer value is thought to be non-pointer")
+}
 
-	if !IsEitherKind(reflect.ValueOf(testPtr), reflect.Pointer, reflect.Interface) {
-		t.Fatal(test, " did not detect as either pointer or interface")
-	}
+func TestResolveEditableValue(t *testing.T) {
+	assert := assert.New(t)
+
+	tInterface := makeInterface()
+	testPtr := &testStruct{}
+
+	assert.False(reflect.ValueOf(tInterface).CanSet())
+	assert.False(reflect.ValueOf(testPtr).CanSet())
+	assert.True(ResolveEditableValue(reflect.ValueOf(testPtr)).CanSet())
+	assert.True(ResolveEditableValue(reflect.ValueOf(tInterface)).CanSet())
+}
+
+func makeInterface() testInterface {
+	return &testStruct{}
 }

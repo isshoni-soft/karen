@@ -2,6 +2,15 @@ package karen
 
 import "reflect"
 
+func ResolveEditableValue(object reflect.Value) reflect.Value {
+	if IsEitherKind(object, reflect.Interface, reflect.Pointer) {
+		object = object.Elem()
+		return ResolveEditableValue(object)
+	}
+
+	return object
+}
+
 func IsEitherKind(object reflect.Value, kinds ...reflect.Kind) bool {
 	for _, k := range kinds {
 		if object.Kind() == k {
