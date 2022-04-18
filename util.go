@@ -1,14 +1,16 @@
 package karen
 
+import "reflect"
+
 func Zero[T any]() T {
 	var result T
 	return result
 }
 
-func IsZero[T comparable](incoming T) bool {
+func IsZero[T any](incoming T) bool {
 	zero := Zero[T]()
 
-	return incoming == zero
+	return reflect.DeepEqual(incoming, zero)
 }
 
 func Cast[T any](incoming any) T {
