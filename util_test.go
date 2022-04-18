@@ -1,8 +1,13 @@
 package karen
 
-import "testing"
+import (
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
 
-type CastTest struct{}
+type CastTest struct {
+	data string
+}
 
 type FirstInterface interface {
 	First()
@@ -38,4 +43,15 @@ func TestCast(t *testing.T) {
 	if v := Cast[string](test); v != Zero[string]() {
 		t.Fatal()
 	}
+}
+
+func TestIsZero(t *testing.T) {
+	assert := assert.New(t)
+
+	test := Zero[CastTest]()
+
+	assert.True(IsZero(test))
+	assert.False(IsZero(CastTest{
+		data: "test",
+	}))
 }
