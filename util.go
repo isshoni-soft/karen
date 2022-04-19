@@ -13,6 +13,12 @@ func IsZero[T any](incoming T) bool {
 	return reflect.DeepEqual(incoming, zero)
 }
 
+func CheckErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func Cast[T any](incoming any) T {
 	if v, ok := incoming.(T); ok {
 		return v
