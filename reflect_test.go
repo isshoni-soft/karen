@@ -16,6 +16,33 @@ type testStruct struct {
 
 func (t testStruct) Test() {}
 
+func TestForEachFieldTagged(t *testing.T) {
+	assert := assert.New(t)
+
+	test := testStruct{
+		someField: "value",
+	}
+
+	ForEachFieldTagged(reflect.ValueOf(test), "sometag", func(field reflect.StructField, value reflect.Value, tagval string) {
+		assert.Equal(field.Name, "someField")
+		assert.Equal(value.String(), "value")
+		assert.Equal(tagval, "thevalue")
+	})
+}
+
+func TestForEachField(t *testing.T) {
+	assert := assert.New(t)
+
+	test := testStruct{
+		someField: "value",
+	}
+
+	ForEachField(reflect.ValueOf(test), func(field reflect.StructField, value reflect.Value) {
+		assert.Equal(field.Name, "someField")
+		assert.Equal(value.String(), "value")
+	})
+}
+
 func TestFindFieldWithMatchingTag(t *testing.T) {
 	assert := assert.New(t)
 

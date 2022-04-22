@@ -2,6 +2,24 @@ package karen
 
 import "reflect"
 
+func ForEachFieldTagged(object reflect.Value, tagName string, consumer func(field reflect.StructField, value reflect.Value, tagValue string)) {
+	ForEachField(object, func(field reflect.StructField, value reflect.Value) {
+		if v, ok := field.Tag.Lookup(tagName); ok {
+			consumer(field, value, v)
+		}
+	})
+}
+
+func ForEachField(object reflect.Value, consumer func(field reflect.StructField, value reflect.Value)) {
+	object = ResolveEditableValue(object)
+	fieldNums := object.NumField()
+
+	for x := 0; x < fieldNums; x++ {
+		field := object.Type().Field(x)
+		consumer(field, object.Field(x))
+	}
+}
+
 func ResolveEditableValue(object reflect.Value) reflect.Value {
 	if IsEitherKind(object, reflect.Interface, reflect.Pointer) {
 		object = object.Elem()
