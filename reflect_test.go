@@ -16,6 +16,20 @@ type testStruct struct {
 
 func (t testStruct) Test() {}
 
+func TestExecuteOnField(t *testing.T) {
+	assert := assert.New(t)
+
+	test := testStruct{
+		someField: "value",
+	}
+
+	ExecuteOnField(reflect.ValueOf(test), "someField", func(field reflect.StructField, value reflect.Value) {
+		assert.Equal("someField", field.Name)
+		assert.Equal("value", value.String())
+		assert.Equal("thevalue", field.Tag.Get("sometag"))
+	})
+}
+
 func TestForEachFieldTagged(t *testing.T) {
 	assert := assert.New(t)
 
@@ -24,9 +38,9 @@ func TestForEachFieldTagged(t *testing.T) {
 	}
 
 	ForEachFieldTagged(reflect.ValueOf(test), "sometag", func(field reflect.StructField, value reflect.Value, tagval string) {
-		assert.Equal(field.Name, "someField")
-		assert.Equal(value.String(), "value")
-		assert.Equal(tagval, "thevalue")
+		assert.Equal("someField", field.Name)
+		assert.Equal("value", value.String())
+		assert.Equal("thevalue", tagval)
 	})
 }
 
@@ -38,8 +52,8 @@ func TestForEachField(t *testing.T) {
 	}
 
 	ForEachField(reflect.ValueOf(test), func(field reflect.StructField, value reflect.Value) {
-		assert.Equal(field.Name, "someField")
-		assert.Equal(value.String(), "value")
+		assert.Equal("someField", field.Name)
+		assert.Equal("value", value.String())
 	})
 }
 

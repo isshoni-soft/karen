@@ -2,6 +2,16 @@ package karen
 
 import "reflect"
 
+func ExecuteOnField(object reflect.Value, fieldName string, consumer func(field reflect.StructField, value reflect.Value)) {
+	object = ResolveEditableValue(object)
+	field, exists := object.Type().FieldByName(fieldName)
+	if !exists {
+		return
+	}
+
+	consumer(field, object.FieldByName(fieldName))
+}
+
 func ForEachFieldTagged(object reflect.Value, tagName string, consumer func(field reflect.StructField, value reflect.Value, tagValue string)) {
 	ForEachField(object, func(field reflect.StructField, value reflect.Value) {
 		if v, ok := field.Tag.Lookup(tagName); ok {
