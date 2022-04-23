@@ -2,6 +2,26 @@ package karen
 
 import "reflect"
 
+func EditableValueOf(value any) reflect.Value {
+	return ResolveEditableValue(reflect.ValueOf(value))
+}
+
+func InsertIntoField(object reflect.Value, fieldName string, value any) (any, bool) {
+	success := false
+	var prevVal any
+
+	ExecuteOnField(object, fieldName, func(field reflect.StructField, val reflect.Value) {
+		prevVal = val.Interface()
+
+		if val.CanSet() {
+			success = true
+			val.Set(reflect.ValueOf(value))
+		}
+	})
+
+	return prevVal, success
+}
+
 func ExecuteOnField(object reflect.Value, fieldName string, consumer func(field reflect.StructField, value reflect.Value)) {
 	object = ResolveEditableValue(object)
 	field, exists := object.Type().FieldByName(fieldName)

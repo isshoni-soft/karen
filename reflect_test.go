@@ -7,24 +7,39 @@ import (
 )
 
 type testInterface interface {
-	Test()
+	Test() string
 }
 
 type testStruct struct {
-	someField string `sometag:"thevalue"`
+	SomeField string `sometag:"thevalue"`
 }
 
-func (t testStruct) Test() {}
+func (t testStruct) Test() string {
+	return t.SomeField
+}
+
+func TestEditableValueOf(t *testing.T) {
+	assert := assert.New(t)
+
+	test := testStruct{
+		SomeField: "value",
+	}
+
+	editableVal := EditableValueOf(&test)
+	editableVal.FieldByName("SomeField").Set(reflect.ValueOf("test"))
+
+	assert.Equal("test", test.SomeField)
+}
 
 func TestExecuteOnField(t *testing.T) {
 	assert := assert.New(t)
 
 	test := testStruct{
-		someField: "value",
+		SomeField: "value",
 	}
 
-	ExecuteOnField(reflect.ValueOf(test), "someField", func(field reflect.StructField, value reflect.Value) {
-		assert.Equal("someField", field.Name)
+	ExecuteOnField(reflect.ValueOf(test), "SomeField", func(field reflect.StructField, value reflect.Value) {
+		assert.Equal("SomeField", field.Name)
 		assert.Equal("value", value.String())
 		assert.Equal("thevalue", field.Tag.Get("sometag"))
 	})
@@ -34,11 +49,11 @@ func TestForEachFieldTagged(t *testing.T) {
 	assert := assert.New(t)
 
 	test := testStruct{
-		someField: "value",
+		SomeField: "value",
 	}
 
 	ForEachFieldTagged(reflect.ValueOf(test), "sometag", func(field reflect.StructField, value reflect.Value, tagval string) {
-		assert.Equal("someField", field.Name)
+		assert.Equal("SomeField", field.Name)
 		assert.Equal("value", value.String())
 		assert.Equal("thevalue", tagval)
 	})
@@ -48,11 +63,11 @@ func TestForEachField(t *testing.T) {
 	assert := assert.New(t)
 
 	test := testStruct{
-		someField: "value",
+		SomeField: "value",
 	}
 
 	ForEachField(reflect.ValueOf(test), func(field reflect.StructField, value reflect.Value) {
-		assert.Equal("someField", field.Name)
+		assert.Equal("SomeField", field.Name)
 		assert.Equal("value", value.String())
 	})
 }
@@ -61,7 +76,7 @@ func TestFindFieldWithMatchingTag(t *testing.T) {
 	assert := assert.New(t)
 
 	test := testStruct{
-		someField: "data",
+		SomeField: "data",
 	}
 	field := FindFieldWithMatchingTag(reflect.ValueOf(test), "sometag", "thevalue")
 
@@ -72,11 +87,11 @@ func TestIsEitherKind(t *testing.T) {
 	assert := assert.New(t)
 
 	testPtr := &testStruct{
-		someField: "data",
+		SomeField: "data",
 	}
 
 	test := testStruct{
-		someField: "data",
+		SomeField: "data",
 	}
 
 	assert.False(IsEitherKind(reflect.ValueOf(test), reflect.Pointer, reflect.Interface), "non pointer value is thought to be pointer")
