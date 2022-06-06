@@ -48,7 +48,7 @@ func (s *stack[T]) Clear() {
 }
 
 func (s *stack[T]) AddCollection(add Collection[T]) error {
-	return add.ForEach(func(val T) {
+	return add.ForEach(func(val T, _ int) {
 		s.Add(val)
 	})
 }
@@ -59,9 +59,12 @@ func (s *stack[T]) AddSlice(slice []T) {
 	}
 }
 
-func (s *stack[T]) ForEach(consumer Consumer[T]) error {
+func (s *stack[T]) ForEach(consumer BiConsumer[T, int]) error {
+	index := 0
+
 	_, err := s.Find(func(value T) bool {
-		consumer(value)
+		consumer(value, index)
+		index++
 		return false
 	})
 
@@ -112,6 +115,10 @@ func (s *stack[T]) findElement(filter Filter[T]) (*list.Element, error) {
 func (s *stack[T]) Find(filter Filter[T]) (T, error) {
 	elem, err := s.findElement(filter)
 
+	if elem == nil {
+		return Zero[T](), err
+	}
+
 	return Cast[T](elem.Value), err
 }
 
@@ -127,7 +134,7 @@ func (s *stack[T]) AllMatching(filter Filter[T]) ([]T, error) {
 func (s *stack[T]) AsSlice() ([]T, error) {
 	var result []T
 
-	err := s.ForEach(func(val T) {
+	err := s.ForEach(func(val T, _ int) {
 		result = append(result, val)
 	})
 
@@ -139,7 +146,7 @@ func (s *stack[T]) Contains(value T) (bool, error) {
 		return reflect.DeepEqual(current, value)
 	})
 
-	return IsZero(result), err
+	return !IsZero(result), err
 }
 
 func (s *stack[T]) Pop() (T, error) {
@@ -170,8 +177,12 @@ func (s stack[T]) Empty() bool {
 	return s.Size() == 0
 }
 
-func NewStack[T any]() Stack[T] {
-	return &stack[T]{
+func NewStack[T any](values ...T) Stack[T] {
+	result := &stack[T]{
 		list: list.New(),
 	}
+
+	result.AddSlice(values)
+
+	return result
 }

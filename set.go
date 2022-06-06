@@ -25,7 +25,7 @@ func (s *set[T]) Remove(value T) (bool, error) {
 }
 
 func (s *set[T]) AddCollection(add Collection[T]) error {
-	return add.ForEach(func(v T) {
+	return add.ForEach(func(v T, _ int) {
 		s.Add(v)
 	})
 }
@@ -58,9 +58,12 @@ func (s *set[T]) Find(filter Filter[T]) (T, error) {
 	return Zero[T](), nil
 }
 
-func (s *set[T]) ForEach(consumer Consumer[T]) error {
+func (s *set[T]) ForEach(consumer BiConsumer[T, int]) error {
+	index := 0
+
 	_, err := s.Find(func(current T) bool {
-		consumer(current)
+		consumer(current, index)
+		index++
 		return false
 	})
 

@@ -5,7 +5,7 @@ type Collection[T any] interface {
 	Remove(value T) (bool, error)
 	AddCollection(collection Collection[T]) error
 	AddSlice(slice []T)
-	ForEach(consumer Consumer[T]) error
+	ForEach(consumer BiConsumer[T, int]) error
 	Find(filter Filter[T]) (T, error)
 	AllMatching(filter Filter[T]) ([]T, error)
 	Contains(value T) (bool, error)
