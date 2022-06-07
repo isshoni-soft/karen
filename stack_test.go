@@ -12,8 +12,8 @@ func makeStack() Stack[string] {
 	return stack
 }
 
-func validateSlice(t *testing.T, slice []string) {
-	for i, s := range expected {
+func validateSlice(t *testing.T, slice, against []string) {
+	for i, s := range against {
 		if slice[i] != s {
 			t.Fatal("produced string slice does not match expected", slice)
 		}
@@ -88,11 +88,12 @@ func TestStackAsSlice(t *testing.T) {
 	slice, err := stack.AsSlice()
 
 	checkError(t, err)
-	validateSlice(t, slice)
+	validateSlice(t, slice, expected)
 }
 
 func TestStackAllMatching(t *testing.T) {
 	stack := makeStack()
+	stack.Add("test")
 
 	matching, err := stack.AllMatching(func(value string) bool {
 		return value[0] == 's'
@@ -104,7 +105,7 @@ func TestStackAllMatching(t *testing.T) {
 		t.Fatal("did not find all strings")
 	}
 
-	validateSlice(t, matching)
+	validateSlice(t, matching, expected)
 }
 
 func TestStackFind(t *testing.T) {
@@ -131,4 +132,78 @@ func TestStackForEach(t *testing.T) {
 	})
 
 	checkError(t, err)
+}
+
+func TestStackAddSlice(t *testing.T) {
+	stack := NewStack[string]()
+
+	stack.AddSlice([]string{"string1", "string2", "string3"})
+	stk, err := stack.AsSlice()
+
+	checkError(t, err)
+	validateSlice(t, stk, expected)
+}
+
+func TestStackAddCollection(t *testing.T) {
+	stack := NewStack[string]()
+	stk := NewStack[string](expected...)
+
+	err := stack.AddCollection(stk)
+
+	checkError(t, err)
+
+	slice, err := stack.AsSlice()
+
+	checkError(t, err)
+	validateSlice(t, slice, expected)
+}
+
+func TestStackClear(t *testing.T) {
+	stack := makeStack()
+
+	slice, err := stack.AsSlice()
+
+	checkError(t, err)
+	validateSlice(t, slice, expected)
+
+	stack.Clear()
+
+	if !stack.Empty() {
+		t.Fatal("stack reports it is not empty")
+	}
+
+	slice, err = stack.AsSlice()
+
+	if len(slice) != 0 {
+		t.Fatal("new slice is not 0 length")
+	}
+}
+
+func TestStackRemove(t *testing.T) {
+	stack := makeStack()
+
+	removed, err := stack.Remove("string2")
+
+	checkError(t, err)
+
+	if !removed {
+		t.Fatal("stack reports remove didn't work")
+	}
+
+	slice, err := stack.AsSlice()
+
+	checkError(t, err)
+	validateSlice(t, slice, []string{"string3", "string1"})
+}
+
+func TestStackAdd(t *testing.T) {
+	stack := NewStack[string]()
+
+	stack.Add("string1")
+
+	if val, err := stack.Pop(); val != "string1" {
+		t.Fatal("stack didn't return string1")
+	} else {
+		checkError(t, err)
+	}
 }

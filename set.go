@@ -102,8 +102,12 @@ func (s *set[T]) Empty() bool {
 	return s.Size() == 0
 }
 
-func NewSet[T comparable]() Set[T] {
-	return &set[T]{
+func NewSet[T comparable](values ...T) Set[T] {
+	result := &set[T]{
 		backing: make(map[T]any),
 	}
+
+	result.AddSlice(values)
+
+	return result
 }
