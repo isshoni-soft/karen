@@ -50,6 +50,12 @@ func Cast[T any](incoming any) T {
 	return Zero[T]()
 }
 
+func IsType[T any](incoming any) bool {
+	_, ok := incoming.(T)
+
+	return ok
+}
+
 func CastError[T any](i any) (T, error) {
 	if v, ok := i.(T); ok {
 		return v, nil

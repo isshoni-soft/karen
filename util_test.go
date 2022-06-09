@@ -55,3 +55,10 @@ func TestIsZero(t *testing.T) {
 		data: "test",
 	}))
 }
+
+func TestIsType(t *testing.T) {
+	assert := assert.New(t)
+	test := CastTest{}
+
+	assert.True(IsType[SecondInterface](test))
+}
