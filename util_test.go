@@ -62,3 +62,9 @@ func TestIsType(t *testing.T) {
 
 	assert.True(IsType[SecondInterface](test))
 }
+
+func TestSizeOf(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.Equal(4, SizeOf[float32]())
+}

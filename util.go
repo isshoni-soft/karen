@@ -3,6 +3,7 @@ package karen
 import (
 	"fmt"
 	"reflect"
+	"unsafe"
 )
 
 func Zero[T any]() T {
@@ -62,4 +63,12 @@ func CastError[T any](i any) (T, error) {
 	} else {
 		return Zero[T](), fmt.Errorf("conversion error: datatype in stack doesn't match high level type")
 	}
+}
+
+func SizeOf[T any]() int {
+	return int(unsafe.Sizeof(Zero[T]()))
+}
+
+func OffsetOfWrapper[T any](offseter func(v T) uintptr) uintptr {
+	return offseter(Zero[T]())
 }
